@@ -5,6 +5,7 @@ const table = new Table(data);
 table.startSort();
 
 // testing stopSort()
+
 // setTimeout(() => {
 //   table.stopSort();
-// }, 20000);
+// }, 16000);

@@ -2,16 +2,29 @@
  * @class Table
  */
 export default class Table {
+  /**
+   * Читает данные из data
+   *
+   * Создает таблицу согласно разметки
+   *
+   * @param {Array} data - массив с данными
+   */
   constructor(data) {
     this.data = data;
     this.table = null;
     this.timerSort = null;
 
-    this.createTableMarkup();
+    this.createTableMarkup(this.data);
+    this.createContainer();
     this.getTable();
   }
 
-  createTableMarkup() {
+  /**
+   * Создает разметку для таблицы
+   *
+   * @param {Array} data - массив данных
+   */
+  createTableMarkup(data) {
     this.table = document.createElement('table');
     this.table.classList.add('table');
 
@@ -24,7 +37,7 @@ export default class Table {
   <th class="imdb">imdb</th>
       `;
 
-    this.data.forEach((e) => {
+    data.forEach((e) => {
       const tr = document.createElement('tr');
       tr.classList.add('rowItem');
 
@@ -45,56 +58,81 @@ export default class Table {
     });
   }
 
-  getTable() {
+  /**
+   * Создает элемент с классом container
+   *
+   * Записывает его в body
+   */
+  createContainer() {
+    this.container = document.createElement('div');
+    this.container.classList.add('container');
     const body = document.querySelector('body');
-    body.insertBefore(this.table, body.firstChild);
+    body.insertBefore(this.container, body.firstChild);
   }
 
-  sortUp(param) {
-    this.clearSortedClass();
+  /**
+   * Очищает this.container
+   *
+   * Записывает this.table в this.container
+   */
+  getTable() {
+    this.container.innerHTML = '';
+    this.container.insertBefore(this.table, this.container.firstChild);
+  }
 
-    let table;
-    const node = this.table.querySelectorAll('.rowItem');
+  /**
+   * Сортирует массив данных по возрастанию
+   *
+   * Выводит отсортированную таблицу
+   *
+   * @param {String} param - параметр для сортировки
+   */
+  sortUp(param) {
+    let dataSorted;
     if (param === 'title') {
-      table = [...node].sort((a, b) => {
-        const first = a.dataset[param].replace(/ё/, 'е');
-        const second = b.dataset[param].replace(/ё/, 'е');
+      dataSorted = this.data.sort((a, b) => {
+        const first = a[param].replace(/ё/, 'е');
+        const second = b[param].replace(/ё/, 'е');
         return first > second ? 1 : -1;
       });
     } else {
-      table = [...node].sort((a, b) => (Number(a.dataset[param]) - Number(b.dataset[param])));
+      dataSorted = this.data.sort((a, b) => (a[param] - b[param]));
     }
 
-    this.table.querySelector(`th.${param}`).classList.add('sorted-up');
+    this.createTableMarkup(dataSorted);
+    this.getTable();
 
-    table.forEach((e) => {
-      this.table.appendChild(e);
-    });
-    return true;
+    this.table.querySelector(`th.${param}`).classList.add('sorted-up');
   }
 
+  /**
+   * Сортирует массив данных по убыванию
+   *
+   * Выводит отсортированную таблицу
+   *
+   * @param {String} param - параметр для сортировки
+   */
   sortDown(param) {
-    this.clearSortedClass();
-
-    let table;
-    const node = this.table.querySelectorAll('.rowItem');
+    let dataSorted;
     if (param === 'title') {
-      table = [...node].sort((a, b) => {
-        const first = a.dataset[param].replace(/ё/, 'е');
-        const second = b.dataset[param].replace(/ё/, 'е');
+      dataSorted = this.data.sort((a, b) => {
+        const first = a[param].replace(/ё/, 'е');
+        const second = b[param].replace(/ё/, 'е');
         return first < second ? 1 : -1;
       });
     } else {
-      table = [...node].sort((a, b) => (Number(b.dataset[param]) - Number(a.dataset[param])));
+      dataSorted = this.data.sort((a, b) => (b[param] - a[param]));
     }
-    this.table.querySelector(`th.${param}`).classList.add('sorted-down');
 
-    table.forEach((e) => {
-      this.table.appendChild(e);
-    });
-    return true;
+    this.createTableMarkup(dataSorted);
+    this.getTable();
+
+    this.table.querySelector(`th.${param}`).classList.add('sorted-down');
   }
 
+  /**
+   * Запускает сортировку таблицы каждые 2 секунды
+   */
   startSort() {
     const param = [];
     const cells = document.querySelectorAll('th');
@@ -116,15 +154,10 @@ export default class Table {
     this.timerSort = setInterval(func, 4000);
   }
 
+  /**
+   * Останавливает сортировку
+   */
   stopSort() {
     clearInterval(this.timerSort);
-  }
-
-  clearSortedClass() {
-    const cells = this.table.querySelectorAll('th');
-    cells.forEach((cell) => {
-      cell.classList.remove(...[...cell.classList]
-        .filter((o) => o.startsWith('sorted')));
-    });
   }
 }

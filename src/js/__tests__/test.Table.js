@@ -2,7 +2,8 @@ import Table from '../Table';
 import data from '../dataList';
 
 const table = new Table(data);
-table.createTableMarkup();
+table.createTableMarkup(table.data);
+table.createContainer();
 table.getTable();
 
 describe('sortUp()', () => {
